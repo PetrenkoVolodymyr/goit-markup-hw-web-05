@@ -6,19 +6,17 @@ import sys
 dates_list =[]
 currency_list = ['USD', 'EUR']
 
-
-
 class Request:
     async def handler (self, days, curr_list):
-        reply=[]
+        
         dates_list = await self.dates_generator(days)
+        reply=[]
         for date in dates_list:
             data_per_day = await self.data_generator(date, curr_list)
-            # print(data_per_day)
             required_data_per_day = await self.adapter(date, data_per_day)
-            # print(required_data_per_day)
             reply.append(required_data_per_day)
-        print(reply)
+
+        return reply
 
 
     async def dates_generator(self, number):
@@ -46,10 +44,6 @@ class Request:
         async with aiohttp.ClientSession() as session:
             async with session.get('https://api.privatbank.ua/p24api/exchange_rates', params = params) as response:
 
-                # print("Status:", response.status)
-                # print("Content-type:", response.headers['content-type'])
-                # print('Cookies: ', response.cookies)
-                # print(response.ok)
                 data = await response.json()
                 all_rates = data['exchangeRate']
                 for currency in curr_list:
@@ -60,10 +54,8 @@ class Request:
 
 async def main():   
     port = Request()
-
-    await port.handler(qty_days, currency_list)
-    
-    print(dates_list)
+    print (await port.handler(qty_days, currency_list))
+   
 
 if __name__ == "__main__":
     qty_days = int(sys.argv[1])
